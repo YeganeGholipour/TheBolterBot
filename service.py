@@ -7,8 +7,8 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN: Final = "6896491676:AAE7GFgoAL8H0iAvg148WTWV_66lRJXpNRg"
-client_access_token: Final = "stewQW4cPkDNvMOdNut9F9t0p6CqNTi-gIjVEaKOW4V27qHnNchCDZBDTCZ9-MDX"
+TOKEN: Final = "Token"
+client_access_token: Final = "Token"
 
 def get_song_id(artist_id):
     genius_search_url = f"http://api.genius.com/artists/{artist_id}/songs"
