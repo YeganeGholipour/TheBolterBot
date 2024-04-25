@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv, dotenv_values 
 import logging
 import random
 import requests
@@ -7,13 +9,15 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Callb
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN: Final = "6896491676:AAE7GFgoAL8H0iAvg148WTWV_66lRJXpNRg"
-client_access_token: Final = "stewQW4cPkDNvMOdNut9F9t0p6CqNTi-gIjVEaKOW4V27qHnNchCDZBDTCZ9-MDX"
+load_dotenv() 
+
+TOKEN: Final = os.getenv("TOKEN")
+CLIENT_ACCESS_TOKEN: Final = os.getenv("CLIENT_ACCESS_TOKEN")
 
 def get_artist_id(artist_name):
     search_term = artist_name
     genius_search_url = "http://api.genius.com/search"
-    params = {"q": search_term, "access_token": client_access_token}
+    params = {"q": search_term, "access_token": CLIENT_ACCESS_TOKEN}
 
     response = requests.get(genius_search_url, params=params).json()
 
@@ -24,7 +28,7 @@ def get_artist_id(artist_name):
 
 def get_song_id(artist_id):
     genius_search_url = f"http://api.genius.com/artists/{artist_id}/songs"
-    params = {"access_token": client_access_token}
+    params = {"access_token": CLIENT_ACCESS_TOKEN}
 
     response = requests.get(genius_search_url, params=params).json()
     if response["meta"]["status"] == 200:
@@ -36,7 +40,7 @@ def get_song_id(artist_id):
 
 def get_referents(song_id):
     genius_search_url = f"http://api.genius.com/referents?song_id={song_id}"
-    params = {"access_token": client_access_token}
+    params = {"access_token": CLIENT_ACCESS_TOKEN}
     response = requests.get(genius_search_url, params=params).json()
 
     logging.info("Genius API Response: %s", response)
