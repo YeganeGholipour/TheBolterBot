@@ -57,34 +57,28 @@ def get_lyrics(referents):
     
     return (lyrics, url)
 
-def lyrics_builder(artist="taylor swift"):
+def lyrics_builder(artist):
+    
     logging.info("Getting artist id ...")
-    if artist == "taylor swift":
-        song_id = get_song_id(1177)
-        logging.info("Getting all the referents ...")
-        logging.info(f"song id is: {song_id}")
-        referents = get_referents(song_id)
-        logging.info("Getting a random lyrics ...")
-        logging.info(f"referents is: {referents}")
-        if len(referents)==0:
-            lyrics_builder()
-        lyrics, url = get_lyrics(referents)
-        return lyrics, url
-    else:
-        artist_id = get_artist_id(artist)
-        logging.info("Getting song id ...")
-        logging.info(f"artist id is: {artist_id}")
-        song_id = get_song_id(artist_id)
-        logging.info("Getting all the referents ...")
-        logging.info(f"song id is: {song_id}")
-        referents = get_referents(song_id)
-        logging.info("Getting a random lyrics ...")
-        logging.info(f"referents is: {referents}")
-        if len(referents)==0:
-            lyrics_builder()
-        lyrics, url = get_lyrics(referents)
-        return lyrics, url
+    artist_id = get_artist_id(artist)
 
+    logging.info(f"artist id is: {artist_id}")
+
+    logging.info("Getting song id ...")
+    song_id = get_song_id(artist_id)
+    logging.info(f"song id is: {song_id}")
+
+    logging.info("Getting all the referents ...")
+    referents = get_referents(song_id)
+    logging.info(f"referents is: {referents}")
+
+    if len(referents)==0:
+        lyrics_builder(artist)
+
+    logging.info("Getting a random lyrics ...")
+    lyrics, url = get_lyrics(referents)
+    return lyrics, url
+    
 # Command handlers
 async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"/start command is requested by user {update.effective_user.id} ...")
@@ -137,13 +131,15 @@ async def artist_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
 # Job queue handlers
 async def hourly_artist_lyrics(context: CallbackContext):
     logging.info("Finding lyrics for the scheduled lyrics ....")
-    lyrics, url =  lyrics_builder()  
+    lyrics, url =  lyrics_builder("taylor swift")  
     await context.bot.send_message(
         chat_id=1392123839,
         text=lyrics + f"\n {url}"
     )
 
-
+async def start_job_handler(update: Update, context:ContextTypes.DEFAULT_TYPE):
+    context.job_queue.run_repeating(hourly_artist_lyrics, interval=30, first=0)
+    await update.message.reply_text("Job started successfully!")
 
 
 # # error handlers
@@ -159,6 +155,6 @@ if __name__ == "__main__":
     bot.add_handler(CommandHandler("start", start_handler))
     bot.add_handler(CommandHandler("help", help_handler))
     bot.add_handler(CommandHandler("artist", artist_name_handler))
+    bot.add_handler(CommandHandler("startjob", start_job_handler))
     # bot.add_error_handler(artist_error_handler)
-    job_queue.run_repeating(hourly_artist_lyrics, interval=30, first=0)
     bot.run_polling()
